@@ -5,7 +5,6 @@
 #include "audio_player.h"
 #include <utility> // For std::move and std::exchange
 
-// The callback function, just like in the minimal example
 void AudioPlayer::data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount) {
     // The user data is the AudioPlayer instance itself
     auto* player = static_cast<AudioPlayer*>(pDevice->pUserData);
@@ -15,7 +14,6 @@ void AudioPlayer::data_callback(ma_device* pDevice, void* pOutput, const void* p
     ma_decoder_read_pcm_frames(&player->m_decoder, pOutput, frameCount, nullptr);
 }
 
-// --- Constructor, Destructor, Move Semantics ---
 
 AudioPlayer::AudioPlayer() : m_device{}, m_decoder{}, m_is_initialized(false) {}
 
@@ -64,7 +62,7 @@ AudioPlayer& AudioPlayer::operator=(AudioPlayer&& other) noexcept {
 
 // --- Public Methods ---
 
-std::expected<void, Error::Audio> AudioPlayer::load_and_init(const std::filesystem::path& filePath) {
+std::expected<void, Error::Audio> AudioPlayer::load(const std::filesystem::path& filePath) {
     if (m_is_initialized) {
         ma_device_uninit(&m_device);
         ma_decoder_uninit(&m_decoder);

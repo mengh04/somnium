@@ -1,28 +1,43 @@
 #include "audio_player.h"
+#include "src/file_browser.h"
+#include "ftxui/component/screen_interactive.hpp"
+#include "ftxui/component/component.hpp"
+#include "ftxui/dom/elements.hpp"
+#include <ranges>
 #include <iostream>
 
+
 int main() {
-    AudioPlayer player;
+    freopen("error.log", "w", stderr);
+    using namespace ftxui;
+    auto file_browser = FileBrowser(R"(D:\Music)");
+    auto music_infos = file_browser.get_current_music();
 
-    auto load_result = player.load_and_init("assets/music.flac");
-    if (!load_result) {
-        std::cerr << "Failed to load and initialize audio file." << std::endl;
-        // Here you could check the specific error from the std::unexpected
-        return -1;
-    }
+    auto audio_player = AudioPlayer();
 
-    std::cout << "File loaded. Press Enter to play..." << std::endl;
-    std::cin.get();
+    auto screen = ScreenInteractive::Fullscreen();
 
-    auto play_result = player.play();
-    if (!play_result) {
-        std::cerr << "Failed to play audio." << std::endl;
-        return -1;
-    }
+    const std::vector<std::string> music_titles = music_infos | std::views::transform(&MusicInfo::title) | std::ranges::to<std::vector>();
 
-    std::cout << "Playing... Press Enter to quit." << std::endl;
-    std::cin.get();
+    int menu_selected = 0;
+    int old_menu_selected = 0;
 
+    auto radio_box = Radiobox(music_titles, &menu_selected) | frame | CatchEvent([&] (const Event& event) {
+        if (old_menu_selected != menu_selected) {
+            if (auto result = audio_player.load(music_infos[menu_selected].path); !result) {
+                exit(result.error());
+            };
+            if (auto result = audio_player.play(); !result) {
+                exit(result.error());
+            };
+            old_menu_selected = menu_selected;
+            return true;
+        }
+        return false;
+    });
+
+
+    screen.Loop(radio_box);
 
     return 0;
 }

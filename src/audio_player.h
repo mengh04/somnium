@@ -18,7 +18,7 @@ public:
     AudioPlayer(AudioPlayer&&) noexcept;
     AudioPlayer& operator=(AudioPlayer&&) noexcept;
 
-    std::expected<void, Error::Audio> load_and_init(const std::filesystem::path& filePath);
+    std::expected<void, Error::Audio> load(const std::filesystem::path& filePath);
     std::expected<void, Error::Audio> play();
 
 private:
