@@ -8,9 +8,8 @@
 
 
 int main() {
-    freopen("error.log", "w", stderr);
     using namespace ftxui;
-    auto file_browser = FileBrowser(R"(D:\Music)");
+    auto file_browser = FileBrowser(R"(C:\Music)");
     auto music_infos = file_browser.get_current_music();
 
     auto audio_player = AudioPlayer();
@@ -22,22 +21,7 @@ int main() {
     int menu_selected = 0;
     int old_menu_selected = 0;
 
-    auto radio_box = Radiobox(music_titles, &menu_selected) | frame | CatchEvent([&] (const Event& event) {
-        if (old_menu_selected != menu_selected) {
-            if (auto result = audio_player.load(music_infos[menu_selected].path); !result) {
-                exit(result.error());
-            };
-            if (auto result = audio_player.play(); !result) {
-                exit(result.error());
-            };
-            old_menu_selected = menu_selected;
-            return true;
-        }
-        return false;
-    });
-
-
-    screen.Loop(radio_box);
+    screen.Loop();
 
     return 0;
 }

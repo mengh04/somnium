@@ -4,6 +4,7 @@
 
 #include "file_browser.h"
 
+#include <format>
 #include <utility>
 
 FileBrowser::FileBrowser(std::filesystem::path  path) : m_current_path(std::move(path)) {}
@@ -23,14 +24,23 @@ std::vector<MusicInfo> FileBrowser::get_current_music() const {
 std::string FileBrowser::get_current_path_str() const {
     return m_current_path.string();
 }
-MusicInfo FileBrowser::get_music_info(std::filesystem::path file_path) {
+MusicInfo FileBrowser::get_music_info(const std::filesystem::path& file_path) {
     TagLib::FileRef f(file_path.string().c_str());
-    const std::string title = f.tag()->title().to8Bit(true);
-    const std::string artist = f.tag()->artist().to8Bit(true);
+    std::string title = f.tag()->title().to8Bit(true);
+    std::string artist = f.tag()->artist().to8Bit(true);
+    std::string album = f.tag()->album().to8Bit(true);
+
+    const int seconds = f.audioProperties()->lengthInSeconds();
+    int minutes = seconds / 60;
+    int secs = seconds % 60;
+    std::string duration = std::format("{:02}:{:02}", minutes, secs);
+
     f.save();
     return MusicInfo{
-        .title = title,
-        .artist = artist,
+        .title = std::move(title),
+        .artist = std::move(artist),
+        .album = std::move(album),
+        .duration = std::move(duration),
         .path = file_path.string()
     };
 }

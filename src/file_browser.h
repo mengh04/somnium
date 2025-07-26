@@ -13,6 +13,8 @@
 struct MusicInfo {
     std::string title;
     std::string artist;
+    std::string album;
+    std::string duration;
     std::string path;
 };
 
@@ -28,7 +30,7 @@ public:
     [[nodiscard]] std::string get_current_path_str() const;
     [[nodiscard]] std::vector<MusicInfo> get_current_music() const;
 
-    static MusicInfo get_music_info(std::filesystem::path file_path);
+    static MusicInfo get_music_info(const std::filesystem::path& file_path);
 
 
 
