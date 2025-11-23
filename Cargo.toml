@@ -1,0 +1,15 @@
+[package]
+name = "somnium"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "somnium"
+path = "src/lib.rs"
+
+[dependencies]
+anyhow = "1.0.100"
+gpui = "0.2.2"
+gpui-component = "0.4.1"
+lofty = "0.22.4"
+rodio = "0.21.1"
