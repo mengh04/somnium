@@ -2,11 +2,10 @@ use gpui::{
     AppContext, Context, Entity, InteractiveElement, ParentElement, Render, Styled, Window, div,
     rgb,
 };
+use gpui_component::StyledExt;
 use gpui_component::button::Button;
 use gpui_component::list::{List, ListState};
-use gpui_component::sidebar::{Sidebar, SidebarGroup, SidebarMenu, SidebarMenuItem};
 use gpui_component::slider::{Slider, SliderState};
-use gpui_component::{IconName, Side, StyledExt, v_flex};
 
 use crate::components::song_list::SongListDelegate;
 use crate::constants;
