@@ -2,13 +2,13 @@ use lofty::prelude::*;
 use lofty::probe::Probe;
 use std::path::{Path, PathBuf};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct SongInfo {
     pub path: PathBuf,
     pub title: Option<String>,
     pub artist: Option<String>,
     pub album: Option<String>,
-    pub duration: Option<u32>, // duration in seconds
+    pub duration: Option<u64>, // duration in seconds
 }
 
 impl SongInfo {
@@ -31,7 +31,7 @@ impl SongInfo {
         let title = tag.title().map(|s| s.to_string());
         let artist = tag.artist().map(|s| s.to_string());
         let album = tag.album().map(|s| s.to_string());
-        let duration = tagged_file.properties().duration().as_secs() as u32;
+        let duration = tagged_file.properties().duration().as_secs();
         let duration = Some(duration);
 
         Self {
