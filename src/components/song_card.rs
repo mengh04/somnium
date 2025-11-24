@@ -12,7 +12,7 @@ pub struct SongCard {
 impl Render for SongCard {
     fn render(
         &mut self,
-        window: &mut gpui::Window,
+        _window: &mut gpui::Window,
         cx: &mut gpui::Context<Self>,
     ) -> impl gpui::IntoElement {
         let title = self
