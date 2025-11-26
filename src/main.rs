@@ -1,7 +1,8 @@
 use gpui::{AppContext, Application, WindowBounds, WindowOptions, px, size};
 
 use gpui_component::Root;
-use gpui_component_assets::Assets;
+use somnium::assets::Assets;
+use somnium::themes;
 use somnium::views::main_view::MainWindow;
 
 fn main() {
@@ -9,6 +10,7 @@ fn main() {
 
     app.run(|cx| {
         gpui_component::init(cx);
+        themes::init(cx);
 
         let width_pixels = 1000.;
         let height_pixels = width_pixels / 16. * 9.;

@@ -1,12 +1,12 @@
 use gpui::{
     AppContext, Context, Entity, InteractiveElement, ParentElement, Render, Styled, Window, div,
-    rgb,
 };
 use gpui_component::StyledExt;
 use gpui_component::button::Button;
 use gpui_component::list::{List, ListState};
 use gpui_component::slider::{Slider, SliderState};
 
+use crate::assets::IconName;
 use crate::components::song_list::SongListDelegate;
 use crate::constants;
 use crate::models::song_info::SongInfo;
@@ -23,12 +23,11 @@ impl Render for MainWindow {
         _window: &mut gpui::Window,
         _cx: &mut Context<Self>,
     ) -> impl gpui::IntoElement {
-        div().h_flex().size_full().bg(gpui::white()).child(
+        div().h_flex().size_full().child(
             div()
                 .flex_1()
                 .h_full()
                 .v_flex()
-                .bg(rgb(0x24273a))
                 .child(
                     div()
                         .id("songs_container")
@@ -39,31 +38,21 @@ impl Render for MainWindow {
                 .child(
                     div()
                         .border_t_1()
-                        .border_color(rgb(0x363a4f))
-                        .h_20()
+                        .h_24()
                         .w_full()
-                        .bg(rgb(0x181926))
                         .v_flex()
-                        .child(
-                            div()
-                                .px_3()
-                                .py_1()
-                                .w_full()
-                                .child(Slider::new(&self.slider_state)),
-                        )
+                        .child(div().px_3().w_full().child(Slider::new(&self.slider_state)))
                         .child(
                             div()
                                 .h_flex()
                                 .w_full()
                                 .flex_1()
                                 .border_t_1()
-                                .border_color(rgb(0x363a4f))
-                                // .bg(gpui::red())
                                 .justify_center()
                                 .gap_8()
-                                .child(Button::new("Previous").label("Previous"))
-                                .child(Button::new("Play/Pause").label("Play/Pause"))
-                                .child(Button::new("Next").label("Next")),
+                                .child(Button::new("skip_back").icon(IconName::SkipBack))
+                                .child(Button::new("play/pause").icon(IconName::Play))
+                                .child(Button::new("skip_forword").icon(IconName::SkipForward)),
                         ),
                 ),
         )
