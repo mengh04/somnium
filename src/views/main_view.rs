@@ -86,9 +86,6 @@ impl Render for MainWindow {
 
 impl MainWindow {
     pub fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
-        // 初始化全局播放器服务
-        PlayerService::init();
-
         let song_infos = find_songs(constants::MUSIC_DIR)
             .unwrap()
             .into_iter()

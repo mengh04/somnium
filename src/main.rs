@@ -2,6 +2,7 @@ use gpui::{AppContext, Application, WindowBounds, WindowOptions, px, size};
 
 use gpui_component::Root;
 use somnium::assets::Assets;
+use somnium::services::playback::service::PlayerService;
 use somnium::themes;
 use somnium::views::main_view::MainWindow;
 
@@ -11,6 +12,7 @@ fn main() {
     app.run(|cx| {
         gpui_component::init(cx);
         themes::init(cx);
+        PlayerService::init();
 
         let width_pixels = 1000.;
         let height_pixels = width_pixels / 16. * 9.;
