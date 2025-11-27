@@ -10,19 +10,23 @@ use crate::assets::IconName;
 use crate::components::song_list::SongListDelegate;
 use crate::constants;
 use crate::models::song_info::SongInfo;
+use crate::services::playback::player::{Player, PlayerCommand};
 use crate::utils::find_songs::find_songs;
 
 pub struct MainWindow {
     song_list_state: Entity<ListState<SongListDelegate>>,
     slider_state: Entity<SliderState>,
+    player: Player,
 }
 
 impl Render for MainWindow {
     fn render(
         &mut self,
         _window: &mut gpui::Window,
-        _cx: &mut Context<Self>,
+        cx: &mut Context<Self>,
     ) -> impl gpui::IntoElement {
+        let view_handle = cx.entity();
+
         div().h_flex().size_full().child(
             div()
                 .flex_1()
@@ -50,9 +54,45 @@ impl Render for MainWindow {
                                 .border_t_1()
                                 .justify_center()
                                 .gap_8()
-                                .child(Button::new("skip_back").icon(IconName::SkipBack))
-                                .child(Button::new("play/pause").icon(IconName::Play))
-                                .child(Button::new("skip_forword").icon(IconName::SkipForward)),
+                                .child(Button::new("skip_back").icon(IconName::SkipBack).on_click(
+                                    {
+                                        let view_handle = view_handle.clone();
+                                        move |_, _, cx| {
+                                            view_handle.update(cx, |this, _cx| {
+                                                let _ = this
+                                                    .player
+                                                    .command_sender
+                                                    .send(PlayerCommand::SkipBack);
+                                            })
+                                        }
+                                    },
+                                ))
+                                .child(Button::new("play/pause").icon(IconName::Play).on_click({
+                                    let view_handle = view_handle.clone();
+                                    move |_, _, cx| {
+                                        view_handle.update(cx, |this, _cx| {
+                                            let _ = this
+                                                .player
+                                                .command_sender
+                                                .send(PlayerCommand::Play);
+                                        })
+                                    }
+                                }))
+                                .child(
+                                    Button::new("skip_forword")
+                                        .icon(IconName::SkipForward)
+                                        .on_click({
+                                            let view_handle = view_handle.clone();
+                                            move |_, _, cx| {
+                                                view_handle.update(cx, |this, _cx| {
+                                                    let _ = this
+                                                        .player
+                                                        .command_sender
+                                                        .send(PlayerCommand::SkipForward);
+                                                })
+                                            }
+                                        }),
+                                ),
                         ),
                 ),
         )
@@ -80,9 +120,12 @@ impl MainWindow {
                 .default_value(0.)
         });
 
+        let player = Player::new();
+
         Self {
             song_list_state,
             slider_state,
+            player,
         }
     }
 }
