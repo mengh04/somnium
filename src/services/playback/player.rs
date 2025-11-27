@@ -1,4 +1,10 @@
-use std::{sync::mpsc, thread};
+use std::{
+    path::{Path, PathBuf},
+    sync::mpsc,
+    thread,
+};
+
+#[derive(Clone)]
 pub struct Player {
     pub command_sender: mpsc::Sender<PlayerCommand>,
 }
@@ -12,8 +18,8 @@ impl Player {
 
             while let Ok(command) = rx.recv() {
                 match command {
-                    PlayerCommand::Play => {
-                        player_core.play();
+                    PlayerCommand::Play(path) => {
+                        player_core.play(path);
                     }
                     PlayerCommand::Pause => {
                         player_core.pause();
@@ -30,6 +36,10 @@ impl Player {
                     PlayerCommand::SkipForward => {
                         player_core.skip_forward();
                     }
+                    PlayerCommand::Resume => {
+                        // For simplicity, we'll just call play with a placeholder path.
+                        player_core.resume();
+                    }
                 }
             }
         });
@@ -38,13 +48,15 @@ impl Player {
     }
 }
 
+#[derive(Debug, Clone)]
 pub enum PlayerCommand {
-    Play,
+    Play(PathBuf),
     Pause,
     Stop,
     Seek(u64),
     SkipForward,
     SkipBack,
+    Resume,
 }
 
 struct PlayerCore;
@@ -54,8 +66,9 @@ impl PlayerCore {
         Self
     }
 
-    fn play(&self) {
-        eprintln!("Player: Play");
+    fn play(&self, path: impl AsRef<Path>) {
+        let path = path.as_ref();
+        eprintln!("Player: Play {}", path.display());
     }
 
     fn pause(&self) {
@@ -76,5 +89,9 @@ impl PlayerCore {
 
     fn skip_forward(&self) {
         eprintln!("Player: SkipForward");
+    }
+
+    fn resume(&self) {
+        eprintln!("Player: Resume");
     }
 }

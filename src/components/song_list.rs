@@ -6,6 +6,7 @@ use gpui_component::{
 };
 
 use crate::models::song_info::SongInfo;
+use crate::services::playback::{player::PlayerCommand, service::PlayerService};
 
 pub struct SongListDelegate {
     song_infos: Vec<SongInfo>,
@@ -28,7 +29,11 @@ impl ListDelegate for SongListDelegate {
     ) -> Option<Self::Item> {
         self.filtered_song_infos.get(ix.row).map(|song_info| {
             let title = song_info.title.clone().unwrap_or("未知歌曲".to_string());
-            ListItem::new(ix).child(Label::new(title))
+            ListItem::new(ix)
+                .child(Label::new(&title))
+                .on_click(move |_, _, _| {
+                    println!("Clicked on song: {}", title);
+                })
         })
     }
 
@@ -58,6 +63,17 @@ impl ListDelegate for SongListDelegate {
         cx: &mut gpui::Context<ListState<Self>>,
     ) {
         self.seletected_index = ix;
+
+        // 当选中歌曲时，发送播放命令
+        if let Some(index) = ix {
+            if let Some(song_info) = self.filtered_song_infos.get(index.row) {
+                let player = PlayerService::get();
+                let _ = player
+                    .command_sender
+                    .send(PlayerCommand::Play(song_info.path.clone()));
+            }
+        }
+
         cx.notify();
     }
 }

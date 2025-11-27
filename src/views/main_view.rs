@@ -1,5 +1,6 @@
 use gpui::{
-    AppContext, Context, Entity, InteractiveElement, ParentElement, Render, Styled, Window, div,
+    AppContext, Context, Entity, InteractiveElement, ParentElement, Render, SharedString, Styled,
+    Window, div,
 };
 use gpui_component::StyledExt;
 use gpui_component::button::Button;
@@ -10,22 +11,30 @@ use crate::assets::IconName;
 use crate::components::song_list::SongListDelegate;
 use crate::constants;
 use crate::models::song_info::SongInfo;
-use crate::services::playback::player::{Player, PlayerCommand};
+use crate::services::playback::{player::PlayerCommand, service::PlayerService};
 use crate::utils::find_songs::find_songs;
 
 pub struct MainWindow {
     song_list_state: Entity<ListState<SongListDelegate>>,
     slider_state: Entity<SliderState>,
-    player: Player,
 }
 
 impl Render for MainWindow {
     fn render(
         &mut self,
         _window: &mut gpui::Window,
-        cx: &mut Context<Self>,
+        _cx: &mut Context<Self>,
     ) -> impl gpui::IntoElement {
-        let view_handle = cx.entity();
+        let create_player_button =
+            |id: SharedString, icon_name: IconName, command: PlayerCommand| {
+                Button::new(id).icon(icon_name).on_click({
+                    let command = command.clone();
+                    move |_, _, _cx| {
+                        let player = PlayerService::get();
+                        let _ = player.command_sender.send(command.clone());
+                    }
+                })
+            };
 
         div().h_flex().size_full().child(
             div()
@@ -54,45 +63,21 @@ impl Render for MainWindow {
                                 .border_t_1()
                                 .justify_center()
                                 .gap_8()
-                                .child(Button::new("skip_back").icon(IconName::SkipBack).on_click(
-                                    {
-                                        let view_handle = view_handle.clone();
-                                        move |_, _, cx| {
-                                            view_handle.update(cx, |this, _cx| {
-                                                let _ = this
-                                                    .player
-                                                    .command_sender
-                                                    .send(PlayerCommand::SkipBack);
-                                            })
-                                        }
-                                    },
+                                .child(create_player_button(
+                                    "skip_back".into(),
+                                    IconName::SkipBack,
+                                    PlayerCommand::SkipBack,
                                 ))
-                                .child(Button::new("play/pause").icon(IconName::Play).on_click({
-                                    let view_handle = view_handle.clone();
-                                    move |_, _, cx| {
-                                        view_handle.update(cx, |this, _cx| {
-                                            let _ = this
-                                                .player
-                                                .command_sender
-                                                .send(PlayerCommand::Play);
-                                        })
-                                    }
-                                }))
-                                .child(
-                                    Button::new("skip_forword")
-                                        .icon(IconName::SkipForward)
-                                        .on_click({
-                                            let view_handle = view_handle.clone();
-                                            move |_, _, cx| {
-                                                view_handle.update(cx, |this, _cx| {
-                                                    let _ = this
-                                                        .player
-                                                        .command_sender
-                                                        .send(PlayerCommand::SkipForward);
-                                                })
-                                            }
-                                        }),
-                                ),
+                                .child(create_player_button(
+                                    "play_pause".into(),
+                                    IconName::Play,
+                                    PlayerCommand::Resume,
+                                ))
+                                .child(create_player_button(
+                                    "skip_forward".into(),
+                                    IconName::SkipForward,
+                                    PlayerCommand::SkipForward,
+                                )),
                         ),
                 ),
         )
@@ -101,6 +86,9 @@ impl Render for MainWindow {
 
 impl MainWindow {
     pub fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
+        // 初始化全局播放器服务
+        PlayerService::init();
+
         let song_infos = find_songs(constants::MUSIC_DIR)
             .unwrap()
             .into_iter()
@@ -120,12 +108,9 @@ impl MainWindow {
                 .default_value(0.)
         });
 
-        let player = Player::new();
-
         Self {
             song_list_state,
             slider_state,
-            player,
         }
     }
 }
