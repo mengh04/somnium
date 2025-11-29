@@ -1,5 +1,3 @@
-use std::time::Duration;
-
 use gpui::{
     AppContext, AsyncApp, Context, Entity, InteractiveElement, ParentElement, Render, Styled,
     WeakEntity, Window, div,
@@ -71,7 +69,7 @@ impl Render for MainWindow {
                                         })
                                         .on_click({
                                             move |_, _, cx| {
-                                                view_handle.update(cx, |this, cx| {
+                                                view_handle.update(cx, |this, _cx| {
                                                     let service = PlayerService::get();
                                                     if matches!(
                                                         this.current_state,
@@ -126,61 +124,31 @@ impl MainWindow {
                 .default_value(0.)
         });
 
-        // ==================== 修复的代码开始 ====================
         cx.spawn(|weak_entity: WeakEntity<MainWindow>, cx: &mut AsyncApp| {
-            // 1. 关键步骤：在这里克隆！
-            // cx 传进来是引用，我们 clone 它得到一个有所有权的变量。
+            let mut event_receiver = PlayerService::get().event_receiver.resubscribe();
             let cx = cx.clone();
-
             async move {
-                loop {
-                    // 2. 异步等待 50ms (这是你的轮询间隔)
-                    // 使用 cx.background_executor() 确保时间调度准确且不阻塞
-                    cx.background_executor()
-                        .timer(Duration::from_millis(50))
-                        .await;
-
-                    // 3. 切回主线程更新 UI
-                    // cx.update 会调度闭包到 UI 线程执行
+                while let Ok(event) = event_receiver.recv().await {
                     let _ = cx.update(|cx| {
-                        // 尝试获取 Entity (MainWindow)，如果窗口关了，upgrade 会失败
                         if let Some(entity) = weak_entity.upgrade() {
-                            // 调用你写好的 poll_events
-                            entity.update(cx, |this, cx| {
-                                this.poll_events(cx);
+                            entity.update(cx, |this, cx| match event {
+                                PlayerEvent::StateChanged(state) => {
+                                    this.current_state = state;
+                                    cx.notify();
+                                }
+                                _ => {}
                             });
                         }
                     });
-
-                    // 4. 如果 Entity 已经销毁 (窗口关闭)，跳出循环停止任务
-                    if weak_entity.upgrade().is_none() {
-                        break;
-                    }
                 }
             }
         })
         .detach();
-        // ==================== 修复的代码结束 ====================
 
         Self {
             song_list_state,
             slider_state,
             current_state: PlayerState::Stopped,
-        }
-    }
-
-    fn poll_events(&mut self, cx: &mut Context<Self>) {
-        let player_service = PlayerService::get();
-        let event_receiver = player_service.event_receiver.lock().unwrap();
-
-        while let Ok(event) = event_receiver.try_recv() {
-            match event {
-                PlayerEvent::StateChanged(new_state) => {
-                    self.current_state = new_state;
-                    cx.notify();
-                }
-                _ => (),
-            }
         }
     }
 }

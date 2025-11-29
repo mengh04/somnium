@@ -1,7 +1,7 @@
-use std::sync::{
-    Arc, Mutex, OnceLock, mpsc,
-    mpsc::{Receiver, Sender},
-};
+use std::sync::{OnceLock, mpsc};
+
+use tokio::sync::broadcast;
+
 use std::thread;
 
 use crate::playback::commands::PlayerCommand;
@@ -12,14 +12,14 @@ static PLAYER_SERVICE: OnceLock<PlayerService> = OnceLock::new();
 
 #[derive(Debug)]
 pub struct PlayerService {
-    pub command_sender: Sender<PlayerCommand>,
-    pub event_receiver: Arc<Mutex<Receiver<PlayerEvent>>>,
+    pub command_sender: mpsc::Sender<PlayerCommand>,
+    pub event_receiver: broadcast::Receiver<PlayerEvent>,
 }
 
 impl PlayerService {
     pub fn init() {
         let (command_tx, command_rx) = mpsc::channel::<PlayerCommand>();
-        let (event_tx, event_rx) = mpsc::channel::<PlayerEvent>();
+        let (event_tx, event_rx) = broadcast::channel::<PlayerEvent>(100);
 
         let _ = thread::spawn(move || {
             let mut player = Player::new(event_tx);
@@ -28,7 +28,7 @@ impl PlayerService {
 
         let player_service = PlayerService {
             command_sender: command_tx,
-            event_receiver: Arc::new(Mutex::new(event_rx)),
+            event_receiver: event_rx,
         };
 
         PLAYER_SERVICE.set(player_service).unwrap();

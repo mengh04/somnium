@@ -1,16 +1,18 @@
-use std::sync::mpsc::{self, Receiver, Sender};
+use std::sync::mpsc::Receiver;
+
+use tokio::sync::broadcast;
 
 use crate::playback::commands::PlayerCommand;
 use crate::playback::events::PlayerEvent;
 use crate::playback::state::PlayerState;
 
 pub struct Player {
-    event_sender: mpsc::Sender<PlayerEvent>,
+    event_sender: broadcast::Sender<PlayerEvent>,
     state: PlayerState,
 }
 
 impl Player {
-    pub fn new(event_sender: Sender<PlayerEvent>) -> Self {
+    pub fn new(event_sender: broadcast::Sender<PlayerEvent>) -> Self {
         Player {
             event_sender,
             state: PlayerState::Stopped,
