@@ -6,7 +6,7 @@ use gpui_component::{
 };
 
 use crate::models::song_info::SongInfo;
-use crate::services::playback::{player::PlayerCommand, service::PlayerService};
+use crate::playback::{commands::PlayerCommand, service::PlayerService};
 
 pub struct SongListDelegate {
     song_infos: Vec<SongInfo>,

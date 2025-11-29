@@ -2,7 +2,7 @@ use gpui::{AppContext, Application, WindowBounds, WindowOptions, px, size};
 
 use gpui_component::Root;
 use somnium::assets::Assets;
-use somnium::services::playback::service::PlayerService;
+use somnium::playback::service::PlayerService;
 use somnium::themes;
 use somnium::views::main_view::MainWindow;
 
