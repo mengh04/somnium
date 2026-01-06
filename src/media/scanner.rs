@@ -1,7 +1,8 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
-pub fn get_song_paths(music_dir: &PathBuf) -> anyhow::Result<Vec<PathBuf>> {
-    let song_paths = music_dir
+pub fn get_song_paths(path: impl AsRef<Path>) -> anyhow::Result<Vec<PathBuf>> {
+    let path = path.as_ref();
+    let song_paths = path
         .read_dir()?
         .flatten()
         .map(|entry| entry.path())

@@ -1,11 +1,20 @@
-use gpui::prelude::*;
+use gpui::{Entity, prelude::*};
 use gpui::{Render, Styled, div};
-use gpui_component::label::Label;
 use gpui_component::{ActiveTheme, StyledExt};
 
 use crate::ui::components::sidebar::Sidebar;
+use crate::ui::views::song_list_view::SongListView;
 
-pub struct MainView;
+pub struct MainView {
+    song_list_view: Entity<SongListView>,
+}
+
+impl MainView {
+    pub fn new(window: &mut gpui::Window, cx: &mut gpui::Context<Self>) -> Self {
+        let song_list_view = cx.new(|cx| SongListView::new(window, cx));
+        Self { song_list_view }
+    }
+}
 
 impl Render for MainView {
     fn render(
@@ -24,9 +33,7 @@ impl Render for MainView {
                     .h_full()
                     .p_4()
                     .justify_start()
-                    .child(Label::new(
-                        "Welcome to the Main Viewdfsd fasdfsdfsadf sdfasdfasdf",
-                    )),
+                    .child(self.song_list_view.clone()),
             )
     }
 }

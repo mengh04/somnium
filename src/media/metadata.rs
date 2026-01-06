@@ -6,7 +6,7 @@ use lofty::{
     tag::Accessor,
 };
 
-use crate::media::song::SoundInfo;
+use crate::media::sound_info::SoundInfo;
 
 pub fn get_metadata(path: impl AsRef<Path>) -> anyhow::Result<SoundInfo> {
     let path = path.as_ref();
@@ -49,7 +49,6 @@ pub fn get_metadata(path: impl AsRef<Path>) -> anyhow::Result<SoundInfo> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use std::time::Duration;
     #[test]
     fn test_get_metadata() {
         let path = "fixtures/sample.flac";
