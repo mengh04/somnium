@@ -1,12 +1,17 @@
 use std::path::Path;
 
-use lofty::{file::TaggedFileExt, probe::Probe, tag::Accessor};
+use lofty::{
+    file::{AudioFile, TaggedFileExt},
+    probe::Probe,
+    tag::Accessor,
+};
 
 use crate::media::song::SoundInfo;
 
 pub fn get_metadata(path: impl AsRef<Path>) -> anyhow::Result<SoundInfo> {
     let path = path.as_ref();
     let tagged_file = Probe::open(path)?.read()?;
+    let properties = tagged_file.properties();
 
     if let Some(tag) = tagged_file.primary_tag() {
         let title = tag.title().map(|s| s.to_string()).unwrap_or_else(|| {
@@ -16,11 +21,14 @@ pub fn get_metadata(path: impl AsRef<Path>) -> anyhow::Result<SoundInfo> {
                 .to_string()
         });
         let artist = tag.artist().map(|s| s.to_string());
+        let album = tag.album().map(|s| s.to_string());
 
         Ok(SoundInfo {
             title,
             artist,
             path: path.to_path_buf(),
+            duration: properties.duration(),
+            album,
         })
     } else {
         eprintln!("No metadata!");
@@ -32,6 +40,8 @@ pub fn get_metadata(path: impl AsRef<Path>) -> anyhow::Result<SoundInfo> {
                 .to_string(),
             artist: None,
             path: path.to_path_buf(),
+            album: None,
+            duration: properties.duration(),
         })
     }
 }
@@ -39,6 +49,7 @@ pub fn get_metadata(path: impl AsRef<Path>) -> anyhow::Result<SoundInfo> {
 #[cfg(test)]
 mod test {
     use super::*;
+    use std::time::Duration;
     #[test]
     fn test_get_metadata() {
         let path = "fixtures/sample.flac";
@@ -46,6 +57,10 @@ mod test {
 
         assert_eq!(metadata.title, "Old Memory");
         assert_eq!(metadata.artist, Some("市川淳".to_string()));
+        assert_eq!(
+            metadata.album,
+            Some("『ヨスガノソラ』オリジナルサウンドトラック-New-".to_string())
+        );
     }
 
     #[test]
