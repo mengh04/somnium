@@ -5,7 +5,7 @@ use gpui_component::sidebar::{
     Sidebar as GCSidebar, SidebarFooter, SidebarGroup, SidebarHeader, SidebarMenu, SidebarMenuItem,
 };
 
-use crate::icons::IconName;
+use crate::ui::IconName;
 
 #[derive(IntoElement)]
 pub struct Sidebar;

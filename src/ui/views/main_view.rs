@@ -3,7 +3,7 @@ use gpui::{Render, Styled, div};
 use gpui_component::label::Label;
 use gpui_component::{ActiveTheme, StyledExt};
 
-use crate::components::sidebar::Sidebar;
+use crate::ui::components::sidebar::Sidebar;
 
 pub struct MainView;
 
