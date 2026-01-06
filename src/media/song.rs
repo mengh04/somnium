@@ -1,7 +1,7 @@
-#[derive(sqlx::FromRow, Debug)]
-pub struct Song {
-    pub id: i64,
+use std::path::PathBuf;
+
+pub struct SoundInfo {
     pub title: String,
     pub artist: Option<String>,
-    pub path: String,
+    pub path: PathBuf,
 }

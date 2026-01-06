@@ -1,5 +1,5 @@
-mod media;
-mod ui;
+pub mod media;
+pub mod ui;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
