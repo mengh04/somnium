@@ -1,5 +1,8 @@
+mod media;
 mod ui;
 
-fn main() {
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
     ui::app::run();
+    Ok(())
 }
